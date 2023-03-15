@@ -6,17 +6,32 @@ con = sqlite3.connect("jernbaneDatabase.db")
 
 cursor = con.cursor()
 
-stasjon = input("Velg stasjon: ").lower().title()
-ukedag = input("Velg ukedag: ").lower()
+success = 0 
 
-cursor.execute("select rutenr, avgangstid from Togrutetabell join Driftsdager using (rutenr) where stasjon = ? and ukedag = ?", (stasjon, ukedag))
+while success == 0:
+    stasjon = input("Velg stasjon: ").lower().title()
+    ukedag = input("Velg ukedag: ").lower()
 
-rows = cursor.fetchall()
+    gyldige_ukedager = ["mandag", "tirsdag", "onsdag", "torsdag", "fredag", "lørdag", "søndag"]
 
-print("\n")
-print("Disse resultatene ble funnet for " + stasjon + " på " + ukedag + ":")
-print("Rutenummer, Avgangstid: ")
-for i in range(len(rows)):
-    print(rows[i])
+    cursor.execute("select rutenr, avgangstid from Togrutetabell join Driftsdager using (rutenr) where stasjon = ? and ukedag = ?", (stasjon, ukedag))
+
+    rows = cursor.fetchall()
+
+    print("\n")
+
+    success = 0
+
+    if ukedag in gyldige_ukedager: 
+        if rows != []:
+            print("Disse resultatene ble funnet for " + stasjon + " på " + ukedag + ":")
+            print("Rutenummer, Avgangstid: ")
+            for i in range(len(rows)):
+                print(rows[i])
+            success = 1
+        else: 
+            print("Stasjon eksisterer ikke! Venligst prøv igjen")
+    else:
+        print("Ukedag er ikke gyldig! Venligst prøv igjen")
 
 con.close()

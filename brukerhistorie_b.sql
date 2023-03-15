@@ -123,19 +123,19 @@ insert into Togrutetabell(rutenr, stasjon, ankomsttid, avgangstid)
 values (1, "Bodø", '17:34:00', NULL);
 
 insert into Driftsdager(rutenr, ukedag)
-values (1, "Mandag");
+values (1, "mandag");
 
 insert into Driftsdager(rutenr, ukedag)
-values (1, "Tirsdag");
+values (1, "tirsdag");
 
 insert into Driftsdager(rutenr, ukedag)
-values (1, "Onsdag");
+values (1, "onsdag");
 
 insert into Driftsdager(rutenr, ukedag)
-values (1, "Torsdag");
+values (1, "torsdag");
 
 insert into Driftsdager(rutenr, ukedag)
-values (1, "Fredag");
+values (1, "fredag");
 
 insert into DelstrekningPåRute(rutenr, startstasjon, endestasjon, kjørerHovedretning)
 values (1, "Trondheim S", "Steinkjer", "true");
@@ -256,25 +256,25 @@ insert into Togrutetabell(rutenr, stasjon, ankomsttid, avgangstid)
 values (2, "Bodø", '09:05:00', NULL);
 
 insert into Driftsdager(rutenr, ukedag)
-values (2, "Mandag");
+values (2, "mandag");
 
 insert into Driftsdager(rutenr, ukedag)
-values (2, "Tirsdag");
+values (2, "tirsdag");
 
 insert into Driftsdager(rutenr, ukedag)
-values (2, "Onsdag");
+values (2, "onsdag");
 
 insert into Driftsdager(rutenr, ukedag)
-values (2, "Torsdag");
+values (2, "torsdag");
 
 insert into Driftsdager(rutenr, ukedag)
-values (2, "Fredag");
+values (2, "fredag");
 
 insert into Driftsdager(rutenr, ukedag)
-values (2, "Lørdag");
+values (2, "lørdag");
 
 insert into Driftsdager(rutenr, ukedag)
-values (2, "Søndag");
+values (2, "søndag");
 
 insert into DelstrekningPåRute(rutenr, startstasjon, endestasjon, kjørerHovedretning)
 values (2, "Trondheim S", "Steinkjer", "true");
@@ -356,19 +356,19 @@ insert into Togrutetabell(rutenr, stasjon, ankomsttid, avgangstid)
 values (3, "Trondheim S", '14:13:00', NULL);
 
 insert into Driftsdager(rutenr, ukedag)
-values (3, "Mandag");
+values (3, "mandag");
 
 insert into Driftsdager(rutenr, ukedag)
-values (3, "Tirsdag");
+values (3, "tirsdag");
 
 insert into Driftsdager(rutenr, ukedag)
-values (3, "Onsdag");
+values (3, "onsdag");
 
 insert into Driftsdager(rutenr, ukedag)
-values (3, "Torsdag");
+values (3, "torsdag");
 
 insert into Driftsdager(rutenr, ukedag)
-values (3, "Fredag");
+values (3, "fredag");
 
 insert into DelstrekningPåRute(rutenr, startstasjon, endestasjon, kjørerHovedretning)
 values (3, "Mosjøen", "Mo i Rana", "false");

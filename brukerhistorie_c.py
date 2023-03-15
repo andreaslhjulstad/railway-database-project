@@ -6,7 +6,7 @@ con = sqlite3.connect("jernbaneDatabase.db")
 
 cursor = con.cursor()
 
-stasjon = input("Velg stasjon: ")
+stasjon = input("Velg stasjon: ").lower().title()
 ukedag = input("Velg ukedag: ").lower()
 
 cursor.execute("select rutenr, avgangstid from Togrutetabell join Driftsdager using (rutenr) where stasjon = ? and ukedag = ?", (stasjon, ukedag))

@@ -147,7 +147,7 @@ insert into DelstrekningPåRute(rutenr, startstasjon, endestasjon, kjørerHovedr
 values (1, "Mosjøen", "Mo I Rana", "true");
 
 insert into DelstrekningPåRute(rutenr, startstasjon, endestasjon, kjørerHovedretning)
-values (1, "Mosjøen", "Fauske", "true");
+values (1, "Mo I Rana", "Fauske", "true");
 
 insert into DelstrekningPåRute(rutenr, startstasjon, endestasjon, kjørerHovedretning)
 values (1, "Fauske", "Bodø", "true");
@@ -286,7 +286,7 @@ insert into DelstrekningPåRute(rutenr, startstasjon, endestasjon, kjørerHovedr
 values (2, "Mosjøen", "Mo I Rana", "true");
 
 insert into DelstrekningPåRute(rutenr, startstasjon, endestasjon, kjørerHovedretning)
-values (2, "Mosjøen", "Fauske", "true");
+values (2, "Mo I Rana", "Fauske", "true");
 
 insert into DelstrekningPåRute(rutenr, startstasjon, endestasjon, kjørerHovedretning)
 values (2, "Fauske", "Bodø", "true");

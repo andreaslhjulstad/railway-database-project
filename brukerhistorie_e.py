@@ -67,6 +67,7 @@ def main():
 
     print("\n")
     print("Brukeren ble registrert")
+    print("\n")
     print("---------------------------------------------------------------------------")
 
 

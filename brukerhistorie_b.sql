@@ -114,7 +114,7 @@ insert into Togrutetabell(rutenr, stasjon, ankomsttid, avgangstid)
 values (1, "Mosjøen", '13:20:00', '13:20:00');
 
 insert into Togrutetabell(rutenr, stasjon, ankomsttid, avgangstid)
-values (1, "Mo i Rana", '14:31:00', '14:31:00');
+values (1, "I Rana", '14:31:00', '14:31:00');
 
 insert into Togrutetabell(rutenr, stasjon, ankomsttid, avgangstid)
 values (1, "Fauske", '16:49:00', '16:49:00');
@@ -144,7 +144,7 @@ insert into DelstrekningPåRute(rutenr, startstasjon, endestasjon, kjørerHovedr
 values (1, "Steinkjer", "Mosjøen", "true");
 
 insert into DelstrekningPåRute(rutenr, startstasjon, endestasjon, kjørerHovedretning)
-values (1, "Mosjøen", "Mo i Rana", "true");
+values (1, "Mosjøen", "Mo I Rana", "true");
 
 insert into DelstrekningPåRute(rutenr, startstasjon, endestasjon, kjørerHovedretning)
 values (1, "Mosjøen", "Fauske", "true");
@@ -247,7 +247,7 @@ insert into Togrutetabell(rutenr, stasjon, ankomsttid, avgangstid)
 values (2, "Mosjøen", '04:41:00', '04:41:00');
 
 insert into Togrutetabell(rutenr, stasjon, ankomsttid, avgangstid)
-values (2, "Mo i Rana", '05:55:00', '05:55:00');
+values (2, "Mo I Rana", '05:55:00', '05:55:00');
 
 insert into Togrutetabell(rutenr, stasjon, ankomsttid, avgangstid)
 values (2, "Fauske", '08:19:00', '08:19:00');
@@ -283,7 +283,7 @@ insert into DelstrekningPåRute(rutenr, startstasjon, endestasjon, kjørerHovedr
 values (2, "Steinkjer", "Mosjøen", "true");
 
 insert into DelstrekningPåRute(rutenr, startstasjon, endestasjon, kjørerHovedretning)
-values (2, "Mosjøen", "Mo i Rana", "true");
+values (2, "Mosjøen", "Mo I Rana", "true");
 
 insert into DelstrekningPåRute(rutenr, startstasjon, endestasjon, kjørerHovedretning)
 values (2, "Mosjøen", "Fauske", "true");
@@ -341,10 +341,10 @@ insert into Plass(plassnr, vognID)
 values (12, 5);
 
 insert into Togrute(rutenr, operatør, startstasjon, endestasjon, oppsettID)
-values (3, "SJ", "Mo i Rana", "Trondheim S", 3);
+values (3, "SJ", "Mo I Rana", "Trondheim S", 3);
 
 insert into Togrutetabell(rutenr, stasjon, ankomsttid, avgangstid)
-values (3, "Mo i Rana", NULL, '08:11:00');
+values (3, "Mo I Rana", NULL, '08:11:00');
 
 insert into Togrutetabell(rutenr, stasjon, ankomsttid, avgangstid)
 values (3, "Mosjøen", '09:14:00', '09:14:00');
@@ -371,7 +371,7 @@ insert into Driftsdager(rutenr, ukedag)
 values (3, "fredag");
 
 insert into DelstrekningPåRute(rutenr, startstasjon, endestasjon, kjørerHovedretning)
-values (3, "Mosjøen", "Mo i Rana", "false");
+values (3, "Mosjøen", "Mo I Rana", "false");
 
 insert into DelstrekningPåRute(rutenr, startstasjon, endestasjon, kjørerHovedretning)
 values (3, "Steinkjer", "Mosjøen", "false");

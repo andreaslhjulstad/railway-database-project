@@ -14,7 +14,7 @@ while success == 0:
 
     gyldige_ukedager = ["mandag", "tirsdag", "onsdag", "torsdag", "fredag", "lørdag", "søndag"]
 
-    cursor.execute("select rutenr, avgangstid from Togrutetabell join Driftsdager using (rutenr) where stasjon = ? and ukedag = ?", (stasjon, ukedag))
+    cursor.execute("select * from Togrutetabell join Driftsdager using (rutenr) where stasjon = ? and ukedag = ?", (stasjon, ukedag))
 
     rows = cursor.fetchall()
 
@@ -25,7 +25,7 @@ while success == 0:
     if ukedag in gyldige_ukedager: 
         if rows != []:
             print("Disse resultatene ble funnet for " + stasjon + " på " + ukedag + ":")
-            print("Rutenummer, Avgangstid: ")
+            print("Rutenummer, Stasjon, Ankomsttid, Avgangstid, Ukedag: ")
             for i in range(len(rows)):
                 print(rows[i])
             success = 1

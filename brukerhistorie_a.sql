@@ -12,7 +12,7 @@ insert into Jernbanestasjon(navn, moh)
 values ("Mosjøen", 7);
 
 insert into Jernbanestasjon(navn, moh)
-values ("Mo i Rana", 4);
+values ("Mo I Rana", 4);
 
 insert into Jernbanestasjon(navn, moh)
 values ("Fauske", 34);
@@ -30,10 +30,10 @@ insert into Delstrekning(startstasjon, endestasjon, lengde, erEnkeltspor, banest
 values ("Steinkjer", "Mosjøen", 280, "true", "Nordlandsbanen");
 
 insert into Delstrekning(startstasjon, endestasjon, lengde, erEnkeltspor, banestrekning)
-values ("Mosjøen", "Mo i Rana", 90, "true", "Nordlandsbanen");
+values ("Mosjøen", "Mo I Rana", 90, "true", "Nordlandsbanen");
 
 insert into Delstrekning(startstasjon, endestasjon, lengde, erEnkeltspor, banestrekning)
-values ("Mo i Rana", "Fauske", 170, "true", "Nordlandsbanen");
+values ("Mo I Rana", "Fauske", 170, "true", "Nordlandsbanen");
 
 insert into Delstrekning(startstasjon, endestasjon, lengde, erEnkeltspor, banestrekning)
 values ("Fauske", "Bodø", 60, "true", "Nordlandsbanen");
@@ -48,7 +48,7 @@ insert into StasjonPåBanestrekning(stasjon, banestrekning)
 values ("Mosjøen", "Nordlandsbanen");
 
 insert into StasjonPåBanestrekning(stasjon, banestrekning)
-values ("Mo i Rana", "Nordlandsbanen");
+values ("I Rana", "Nordlandsbanen");
 
 insert into StasjonPåBanestrekning(stasjon, banestrekning)
 values ("Fauske", "Nordlandsbanen");

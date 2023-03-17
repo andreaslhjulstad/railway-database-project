@@ -104,23 +104,23 @@ values (12, 2);
 insert into Togrute(rutenr, operatør, startstasjon, endestasjon, oppsettID)
 values (1, "SJ", "Trondheim S", "Bodø", 1);
 
-insert into Togrutetabell(rutenr, stasjon, ankomsttid, avgangstid)
-values (1, "Trondheim S", NULL, '07:49:00');
+insert into Togrutetabell(rutenr, stasjon, ankomsttid, avgangstid, stasjonsnr)
+values (1, "Trondheim S", NULL, '07:49:00', 1);
 
-insert into Togrutetabell(rutenr, stasjon, ankomsttid, avgangstid)
-values (1, "Steinkjer", '09:51:00', '09:51:00');
+insert into Togrutetabell(rutenr, stasjon, ankomsttid, avgangstid, stasjonsnr)
+values (1, "Steinkjer", '09:51:00', '09:51:00', 2);
 
-insert into Togrutetabell(rutenr, stasjon, ankomsttid, avgangstid)
-values (1, "Mosjøen", '13:20:00', '13:20:00');
+insert into Togrutetabell(rutenr, stasjon, ankomsttid, avgangstid, stasjonsnr)
+values (1, "Mosjøen", '13:20:00', '13:20:00', 3);
 
-insert into Togrutetabell(rutenr, stasjon, ankomsttid, avgangstid)
-values (1, "I Rana", '14:31:00', '14:31:00');
+insert into Togrutetabell(rutenr, stasjon, ankomsttid, avgangstid, stasjonsnr)
+values (1, "I Rana", '14:31:00', '14:31:00', 4);
 
-insert into Togrutetabell(rutenr, stasjon, ankomsttid, avgangstid)
-values (1, "Fauske", '16:49:00', '16:49:00');
+insert into Togrutetabell(rutenr, stasjon, ankomsttid, avgangstid, stasjonsnr)
+values (1, "Fauske", '16:49:00', '16:49:00', 5);
 
-insert into Togrutetabell(rutenr, stasjon, ankomsttid, avgangstid)
-values (1, "Bodø", '17:34:00', NULL);
+insert into Togrutetabell(rutenr, stasjon, ankomsttid, avgangstid, stasjonsnr)
+values (1, "Bodø", '17:34:00', NULL, 6);
 
 insert into Driftsdager(rutenr, ukedag)
 values (1, "mandag");
@@ -237,23 +237,23 @@ values (8, 4);
 insert into Togrute(rutenr, operatør, startstasjon, endestasjon, oppsettID)
 values (2, "SJ", "Trondheim S", "Bodø", 2);
 
-insert into Togrutetabell(rutenr, stasjon, ankomsttid, avgangstid)
-values (2, "Trondheim S", NULL, '23:05:00');
+insert into Togrutetabell(rutenr, stasjon, ankomsttid, avgangstid, stasjonsnr)
+values (2, "Trondheim S", NULL, '23:05:00', 1);
 
-insert into Togrutetabell(rutenr, stasjon, ankomsttid, avgangstid)
-values (2, "Steinkjer", '00:57:00', '00:57:00');
+insert into Togrutetabell(rutenr, stasjon, ankomsttid, avgangstid, stasjonsnr)
+values (2, "Steinkjer", '00:57:00', '00:57:00', 2);
 
-insert into Togrutetabell(rutenr, stasjon, ankomsttid, avgangstid)
-values (2, "Mosjøen", '04:41:00', '04:41:00');
+insert into Togrutetabell(rutenr, stasjon, ankomsttid, avgangstid, stasjonsnr)
+values (2, "Mosjøen", '04:41:00', '04:41:00', 3);
 
-insert into Togrutetabell(rutenr, stasjon, ankomsttid, avgangstid)
-values (2, "Mo I Rana", '05:55:00', '05:55:00');
+insert into Togrutetabell(rutenr, stasjon, ankomsttid, avgangstid, stasjonsnr)
+values (2, "Mo I Rana", '05:55:00', '05:55:00', 4);
 
-insert into Togrutetabell(rutenr, stasjon, ankomsttid, avgangstid)
-values (2, "Fauske", '08:19:00', '08:19:00');
+insert into Togrutetabell(rutenr, stasjon, ankomsttid, avgangstid, stasjonsnr)
+values (2, "Fauske", '08:19:00', '08:19:00', 5);
 
-insert into Togrutetabell(rutenr, stasjon, ankomsttid, avgangstid)
-values (2, "Bodø", '09:05:00', NULL);
+insert into Togrutetabell(rutenr, stasjon, ankomsttid, avgangstid, stasjonsnr)
+values (2, "Bodø", '09:05:00', NULL, 6);
 
 insert into Driftsdager(rutenr, ukedag)
 values (2, "mandag");
@@ -343,17 +343,17 @@ values (12, 5);
 insert into Togrute(rutenr, operatør, startstasjon, endestasjon, oppsettID)
 values (3, "SJ", "Mo I Rana", "Trondheim S", 3);
 
-insert into Togrutetabell(rutenr, stasjon, ankomsttid, avgangstid)
-values (3, "Mo I Rana", NULL, '08:11:00');
+insert into Togrutetabell(rutenr, stasjon, ankomsttid, avgangstid, stasjonsnr)
+values (3, "Mo I Rana", NULL, '08:11:00', 1);
 
-insert into Togrutetabell(rutenr, stasjon, ankomsttid, avgangstid)
-values (3, "Mosjøen", '09:14:00', '09:14:00');
+insert into Togrutetabell(rutenr, stasjon, ankomsttid, avgangstid, stasjonsnr)
+values (3, "Mosjøen", '09:14:00', '09:14:00', 2);
 
-insert into Togrutetabell(rutenr, stasjon, ankomsttid, avgangstid)
-values (3, "Steinkjer", '12:31:00', '12:31:00');
+insert into Togrutetabell(rutenr, stasjon, ankomsttid, avgangstid, stasjonsnr)
+values (3, "Steinkjer", '12:31:00', '12:31:00', 3);
 
-insert into Togrutetabell(rutenr, stasjon, ankomsttid, avgangstid)
-values (3, "Trondheim S", '14:13:00', NULL);
+insert into Togrutetabell(rutenr, stasjon, ankomsttid, avgangstid, stasjonsnr)
+values (3, "Trondheim S", '14:13:00', NULL, 4);
 
 insert into Driftsdager(rutenr, ukedag)
 values (3, "mandag");

@@ -9,12 +9,12 @@ cursor = con.cursor()
 success = 0 
 
 while success == 0:
-    stasjon = input("Velg stasjon: ").lower().title()
-    ukedag = input("Velg ukedag: ").lower()
+    station = input("Velg stasjon: ").lower().title()
+    weekday = input("Velg ukedag: ").lower()
 
-    gyldige_ukedager = ["mandag", "tirsdag", "onsdag", "torsdag", "fredag", "lørdag", "søndag"]
+    valid_weekdays = ["mandag", "tirsdag", "onsdag", "torsdag", "fredag", "lørdag", "søndag"]
 
-    cursor.execute("select * from Togrutetabell join Driftsdager using (rutenr) where stasjon = ? and ukedag = ?", (stasjon, ukedag))
+    cursor.execute("select * from Togrutetabell join Driftsdager using (rutenr) where stasjon = ? and ukedag = ?", (station, weekday))
 
     rows = cursor.fetchall()
 
@@ -22,9 +22,9 @@ while success == 0:
 
     success = 0
 
-    if ukedag in gyldige_ukedager: 
+    if weekday in valid_weekdays: 
         if rows != []:
-            print("Disse resultatene ble funnet for " + stasjon + " på " + ukedag + ":")
+            print("Disse resultatene ble funnet for " + station + " på " + weekday + ":")
             print("Rutenummer, Stasjon, Ankomsttid, Avgangstid, Ukedag: ")
             for i in range(len(rows)):
                 print(rows[i])

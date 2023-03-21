@@ -30,8 +30,8 @@ while success == 0:
                 print(rows[i])
             success = 1
         else: 
-            print("Stasjon eksisterer ikke! Venligst prøv igjen")
+            print("Stasjon eksisterer ikke! Vennligst prøv igjen")
     else:
-        print("Ukedag er ikke gyldig! Venligst prøv igjen")
+        print("Ukedag er ikke gyldig! Vennligst prøv igjen")
 
 con.close()

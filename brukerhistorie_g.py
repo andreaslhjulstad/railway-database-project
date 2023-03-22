@@ -18,6 +18,7 @@ for row in rows:
     saved_stations.append(row[0])
 
 
+# Henter inn brukerens kundenr vha. e-postadressen som en slags primitiv form for innlogging
 def get_customerno():
     # Henter registrerte e-postadresser
     cursor.execute("SELECT epost FROM Kunde")
@@ -96,10 +97,10 @@ def get_next_orderno():
 
 
 # Regner ut antall billetter
-def get_ticket_count(wagon_seat_dict):
+def get_ticket_count(wagon_spot_dict):
     ticket_count = 0
-    for key in wagon_seat_dict.keys():
-        for value in wagon_seat_dict[key]:
+    for key in wagon_spot_dict.keys():
+        for value in wagon_spot_dict[key]:
             ticket_count += 1
     return ticket_count
 
@@ -112,14 +113,17 @@ def get_all_routenos():
 
 
 # Henter mulige vogner for togruten
-def get_all_wagons_and_types(routeno):
+def get_all_wagons(routeno):
     cursor.execute(
-        "SELECT vognID, type FROM Togrute JOIN VognIOppsett USING (oppsettID) JOIN Vogn USING (vognID) WHERE rutenr = ?", (routeno,))
+        "SELECT vognID FROM Togrute JOIN VognIOppsett USING (oppsettID) JOIN Vogn USING (vognID) WHERE rutenr = ?", (routeno,))
     wagons = cursor.fetchall()
-    wagon_type_dict = {}
-    for wagon in wagons:
-        wagon_type_dict[wagon[0]] = wagon[1]
-    return (wagons, wagon_type_dict)
+    return wagons
+
+
+def get_sleeping_wagon_arrangement(wagon_id):
+    cursor.execute("SELECT antallSoveKupeer, sengerPrKupe FROM Sovevogn WHERE vognID = ?", (wagon_id,))
+    arrangement = cursor.fetchall()[0]
+    return arrangement
 
 
 # Henter oppsettID-en til en oppgitt rute
@@ -129,8 +133,8 @@ def get_wagon_layout(routeno):
     return wagon_layout
 
 
-def get_available_seats_in_wagons(wagons, sub_routes, chosen_date, routeno):
-    sub_routes_taken_seats_dict = {}
+def get_available_spots_in_wagons(wagons, sub_routes, chosen_date, routeno):
+    sub_routes_taken_spots_dict = {}
     for sub_route in sub_routes:
         start_sub_station = sub_route[0]
         end_sub_station = sub_route[1]
@@ -144,40 +148,62 @@ def get_available_seats_in_wagons(wagons, sub_routes, chosen_date, routeno):
                         (start_sub_station, end_sub_station, chosen_date.strftime("%Y-%d-%m"), layout_ID))
         rows = cursor.fetchall()
         
-        wagon_unavailable_seats_dict = {}
+        wagon_unavailable_spots_dict = {}
         for row in rows:
-            if row[0] in wagon_unavailable_seats_dict.keys():
-                wagon_unavailable_seats_dict[row[0]].append(row[1])
+            if row[0] in wagon_unavailable_spots_dict.keys():
+                wagon_unavailable_spots_dict[row[0]].append(row[1])
             else:
-                wagon_unavailable_seats_dict[row[0]] = [row[1]]
+                wagon_unavailable_spots_dict[row[0]] = [row[1]]
 
-        sub_routes_taken_seats_dict[sub_route] = wagon_unavailable_seats_dict
+        sub_routes_taken_spots_dict[sub_route] = wagon_unavailable_spots_dict
 
-    wagon_available_seats_dict = {}
+    wagon_available_spots_dict = {}
     for wagon in wagons:
         id = wagon[0]
-        unavailable_seats = set()
+        type = get_wagon_type(id)
+        unavailable_spots = set()
         cursor.execute(
             "SELECT plassnr FROM Plass WHERE vognID = ?", (id,))
-        seats = {seat[0] for seat in cursor.fetchall()}
-        for seat in seats:
-            for sub_route in sub_routes_taken_seats_dict.keys():
-                taken_seats_dict = sub_routes_taken_seats_dict[sub_route]
-                if id in taken_seats_dict.keys():
-                    if seat in taken_seats_dict[id]:
-                        unavailable_seats.add(seat)
-        wagon_available_seats_dict[id] = list(seats - unavailable_seats)
+        spots = {spot[0] for spot in cursor.fetchall()}
+        for spot in spots:
+            for sub_route in sub_routes_taken_spots_dict.keys():
+                taken_spots_dict = sub_routes_taken_spots_dict[sub_route]
+                if id in taken_spots_dict.keys():
+                    if spot in taken_spots_dict[id]:
+                        # Dersom det er en sovevogn, legg alle senger i samme sovekupé til i liste over opptatte plasser
+                        if (type == 'Sovevogn'):
+                            compartments, beds_per_compartment = get_sleeping_wagon_arrangement(id)
+                            position_in_compartment = spot % beds_per_compartment
+                        
+                            # Modulo-aritmetikk gir at vognen på "siste plass i kupeen" er lik 0, vi vil ha den lik antallet senger i stedet
+                            if position_in_compartment == 0:
+                                position_in_compartment = beds_per_compartment
+
+                            diff_top = beds_per_compartment - position_in_compartment
+                            diff_bottom = position_in_compartment - 1
+                            for i in range(1, diff_top + 1):
+                                unavailable_spots.add(spot + i)
+                            for j in range(1, diff_bottom + 1):
+                                unavailable_spots.add(spot - j)
+                        unavailable_spots.add(spot)
+
+        available_spots = list(spots - unavailable_spots)
+        available_spots.sort()
+        if len(available_spots) > 0:
+            wagon_available_spots_dict[id] = available_spots
 
     """
     Liten forklaring for hva vi har tenkt her:
     Vi ønsker å bare vise vogner som har ledige plasser på hele ruten brukeren har valgt. 
     Vi henter derfor, for hver delstrekning, inn de plassene som er opptatt på den delstrekningen på brukerens valgte dato.
     Deretter sjekker vi for hver mulige plass i hver vogn, om denne plassen er utilgengelig på noen av delstrekningene. Dersom det er det,
-    legg den til i en mengde med utilgjengelige plasser. De plassene som er tilgjengelige under hele ruten i en vogn er da differansen mellom mengden 
-    av alle mulige plasser i denne vognen og de setene som er opptatt på minst én delstrekning i vognen. 
+    legg den til i en mengde med utilgjengelige plasser. For sovevogner står det spesifisert i oppgaven at en ikke skal kunne booke en seng i en kupé
+    der noen andre allerede har booket en seng, derfor legges alle sengene i en sovekupé til i listen over utilgjengelige plasser dersom en av dem er booket.
+    De plassene som er tilgjengelige under hele ruten i en vogn er da differansen mellom mengden 
+    av alle mulige plasser i denne vognen og de plassene som er opptatt på minst én delstrekning i vognen. 
     """
 
-    return wagon_available_seats_dict
+    return wagon_available_spots_dict
 
 
 def get_chosen_date(routeno):
@@ -227,101 +253,110 @@ def get_chosen_date(routeno):
     return chosen_date
 
 
-def get_chosen_wagons_and_seats(wagon_available_seats_dict, wagon_type_dict):
-        # Finner gyldige IDer for vognene i ruten
-        valid_ids = []
-        print("\n")
-        print("Tilgjengelige vogner på ruten:")
-        if wagon_available_seats_dict.keys() == 0:
-            print("Denne togruten er dessverre utsolgt")
-            return None
-        for wagon in wagon_available_seats_dict.keys():
-            valid_ids.append(wagon)
-            print(f"ID: {wagon}, Type: {wagon_type_dict[wagon]}")
+# Henter ut vogntypen til vogn-iden som tas som argument
+def get_wagon_type(wagon_id):
+    cursor.execute("SELECT type FROM Vogn WHERE vognID = ?", (wagon_id,))
+    wagon_type = cursor.fetchall()[0][0]
+    return wagon_type
 
-        print("\n")
-        # Spør bruker om å oppgi én vogn til billettbestilling
-        print("Velg vognene du ønsker å kjøpe plasser i. For å velge en vogn, skriv vognID-en i innskrivings-feltet og trykk 'Enter'.")
-        print("Dersom du ikke ønsker å velge flere vogner, skriv 'Stopp' i input-feltet.")
-        chosen_wagons = []
-        chosen_ID = ""
 
-        wagon_chosen_seats_dict = {}
+# Ber brukeren om å velge tilgjengelige vogner og plasser og lagrer disse i en dictionary
+def get_chosen_wagons_and_spots(wagon_available_spots_dict):
+    # Finner gyldige IDer for vognene i ruten
+    valid_ids = []
+    print("\n")
+    if len(wagon_available_spots_dict.keys()) == 0:
+        print("Denne togruten er dessverre utsolgt")
+        return None
+    print("Tilgjengelige vogner på ruten:")
+    for wagon in wagon_available_spots_dict.keys():
+        valid_ids.append(wagon)
+        print(f"ID: {wagon}, Type: {get_wagon_type(wagon)}")
 
-        finish = False
-        while not finish:
+    print("\n")
+    # Spør bruker om å oppgi én vogn til billettbestilling
+    print("Velg vognene du ønsker å kjøpe plasser i. For å velge en vogn, skriv vognID-en i innskrivings-feltet og trykk 'Enter'.")
+    print("Dersom du ikke ønsker å velge flere vogner, skriv 'Stopp' i innskrivings-feltet.")
+    chosen_wagons = []
+    chosen_ID = ""
+
+    wagon_chosen_spots_dict = {}
+
+    finish = False
+    while not finish:
+        chosen_ID = input("Skriv inn vognID: ")
+        if (chosen_ID.lower() == "stopp"):
+            finish = True
+            break
+        while chosen_ID not in [str(id) for id in valid_ids]:
+            print("Ugyldig vognID!")
             chosen_ID = input("Skriv inn vognID: ")
             if (chosen_ID.lower() == "stopp"):
                 finish = True
                 break
-            while chosen_ID not in [str(id) for id in valid_ids]:
-                print("Ugyldig vognID!")
-                chosen_ID = input("Skriv inn vognID: ")
-                if (chosen_ID.lower() == "stopp"):
+        if finish:
+            break
+        if int(chosen_ID) not in chosen_wagons:
+            print("Du har valgt vogn med ID " + chosen_ID)
+            chosen_wagons.append(int(chosen_ID))
+            wagon_chosen_spots_dict[int(chosen_ID)] = []
+        else:
+            print("Du har allerede valgt den vognen!")
+
+    for wagon in chosen_wagons:
+        spots = wagon_available_spots_dict[wagon]
+
+        valid_spots = []
+        print("Tilgjengelige plasser i vognen:", end=" ")
+        for spot in spots:
+            valid_spots.append(spot)
+            print(spot, end="")
+            if (spots.index(spot) != len(spots) - 1):
+                print(",", end=" ")
+
+        print("\n")
+        print("Velg plassene du ønsker å kjøpe billetter for. For å velge en plass, skriv plassnummeret i innskrivings-feltet og trykk 'Enter'.")
+        print(
+            "Dersom du ikke ønsker å velge flere plasser, skriv 'Stopp' i innskrivings-feltet.")
+        chosen_spots = []
+        chosen_spot = ""
+
+        finish = False
+        while not finish:
+            chosen_spot = input(
+                f"Skriv inn plassnummer for vogn med ID {wagon}: ")
+            if (chosen_spot.lower() == "stopp"):
+                finish = True
+                break
+            while chosen_spot not in [str(spot) for spot in valid_spots]:
+                print("Ugyldig plassnummer!")
+                chosen_spot = input(
+                    f"Skriv inn plassnummer for vogn med ID {wagon}: ")
+                if (chosen_spot.lower() == "stopp"):
                     finish = True
                     break
             if finish:
                 break
-            if int(chosen_ID) not in chosen_wagons:
-                print("Du har valgt vogn med ID " + chosen_ID)
-                chosen_wagons.append(int(chosen_ID))
-                wagon_chosen_seats_dict[int(chosen_ID)] = []
+            if int(chosen_spot) not in chosen_spots:
+                print(
+                    f"Du har valgt plass med nummer {chosen_spot} i vogn med ID {wagon}")
+                chosen_spots.append(int(chosen_spot))
+                wagon_chosen_spots_dict[wagon].append(int(chosen_spot))
             else:
-                print("Du har allerede valgt den vognen!")
+                print("Du har allerede valgt den plassen!")
 
-        for wagon in chosen_wagons:
-            seats = wagon_available_seats_dict[wagon]
+    chosen = False
+    if len(wagon_chosen_spots_dict) > 0:
+        for wagon in wagon_chosen_spots_dict.keys():
+            if len(wagon_chosen_spots_dict[wagon]) > 0:
+                chosen = True
 
-            valid_seats = []
-            print("Tilgjengelige plasser i vognen:", end=" ")
-            for seat in seats:
-                valid_seats.append(seat)
-                print(seat, end="")
-                if (seats.index(seat) != len(seats) - 1):
-                    print(",", end=" ")
+    if not chosen:
+        print("\n")
+        print("Du har ikke valgt noen vogner eller plasser, bestillingen avbrytes")
+        return None
 
-            print("\n")
-            print("Velg plassene du ønsker å kjøpe billetter for. For å velge en plass, skriv plassnummeret i input-feltet og trykk 'Enter'.")
-            print(
-                "Dersom du ikke ønsker å velge flere plasser, skriv 'Stopp' i input-feltet.")
-            chosen_seats = []
-            chosen_seat = ""
-
-            finish = False
-            while not finish:
-                chosen_seat = input(
-                    f"Skriv inn plassnummer for vogn med ID {wagon}: ")
-                if (chosen_seat.lower() == "stopp"):
-                    finish = True
-                    break
-                while chosen_seat not in [str(seat) for seat in valid_seats]:
-                    print("Ugyldig plassnummer!")
-                    chosen_seat = input(
-                        f"Skriv inn plassnummer for vogn med ID {wagon}: ")
-                    if (chosen_seat.lower() == "stopp"):
-                        finish = True
-                        break
-                if finish:
-                    break
-                if int(chosen_seat) not in chosen_seats:
-                    print(
-                        f"Du har valgt plass med nummer {chosen_seat} i vogn med ID {wagon}")
-                    chosen_seats.append(int(chosen_seat))
-                    wagon_chosen_seats_dict[wagon].append(int(chosen_seat))
-                else:
-                    print("Du har allerede valgt den plassen!")
-
-        chosen = False
-        if len(wagon_chosen_seats_dict) > 0:
-            for wagon in wagon_chosen_seats_dict.keys():
-                if len(wagon_chosen_seats_dict[wagon]) > 0:
-                    chosen = True
-
-        if not chosen:
-            print("Du har ikke valgt noen vogner eller plasser, bestillingen avbrytes")
-            return None
-
-        return wagon_chosen_seats_dict
+    return wagon_chosen_spots_dict
 
 
 # Registrerer en ny kundeordre for bestillingen
@@ -334,12 +369,12 @@ def place_order(customerno, ticket_count, chosen_date, routeno):
 
 
 # Oppretter en billett for hver valgte plass i de valgte vognene for hver delstrekning på valgt strekning
-def create_tickets(orderno, sub_routes, wagon_chosen_seats_dict):
+def create_tickets(orderno, sub_routes, wagon_chosen_spots_dict):
     for sub_route in sub_routes:
-        for wagon in wagon_chosen_seats_dict.keys():
-            for seat in wagon_chosen_seats_dict[wagon]:
+        for wagon in wagon_chosen_spots_dict.keys():
+            for spot in wagon_chosen_spots_dict[wagon]:
                 cursor.execute("""INSERT INTO Billett (billettnr, plassnr, vognID, ordrenr, startstasjon, endestasjon) 
-                    VALUES (?, ?, ?, ?, ?, ?)""", (get_next_ticketno(), seat, wagon, orderno, sub_route[0], sub_route[1]))
+                    VALUES (?, ?, ?, ?, ?, ?)""", (get_next_ticketno(), spot, wagon, orderno, sub_route[0], sub_route[1]))
         con.commit()
 
 
@@ -438,15 +473,14 @@ def main():
 
             chosen_date = get_chosen_date(routeno)
             if chosen_date is not None:
-                wagons, wagon_type_dict = get_all_wagons_and_types(routeno)
-                wagon_available_seats_dict = get_available_seats_in_wagons(
+                wagons = get_all_wagons(routeno)
+                wagon_available_spots_dict = get_available_spots_in_wagons(
                     wagons, sub_routes, chosen_date, routeno)
-                wagon_chosen_seats_dict = get_chosen_wagons_and_seats(
-                    wagon_available_seats_dict, wagon_type_dict)
-                if wagon_chosen_seats_dict is not None:
-                    ticket_count = get_ticket_count(wagon_chosen_seats_dict)
+                wagon_chosen_spots_dict = get_chosen_wagons_and_spots(wagon_available_spots_dict)
+                if wagon_chosen_spots_dict is not None:
+                    ticket_count = get_ticket_count(wagon_chosen_spots_dict)
                     orderno = place_order(customerno, ticket_count, chosen_date, routeno)
-                    create_tickets(orderno, sub_routes, wagon_chosen_seats_dict)
+                    create_tickets(orderno, sub_routes, wagon_chosen_spots_dict)
 
                     print("\n")
                     print("Din bestilling er nå lagt inn. God tur!")

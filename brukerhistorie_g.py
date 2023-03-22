@@ -22,31 +22,40 @@ def get_customerno():
     # Henter registrerte e-postadresser
     cursor.execute("SELECT epost FROM Kunde")
     saved_emails = cursor.fetchall()
-    # Henter inn e-postadresse fra bruker
-    email = input("Skriv inn e-posten din: ")
-    while not email in saved_emails[0]:
-        print("Den e-postadressen finnes ikke i registeret!")
+    if not len(saved_emails) == 0: 
+        # Henter inn e-postadresse fra bruker
         email = input("Skriv inn e-posten din: ")
+        while not email in saved_emails[0]:
+            print("Den e-postadressen finnes ikke i registeret!")
+            email = input("Skriv inn e-posten din: ")
 
-    # Finner kundenummer til bruker gitt email
-    cursor.execute("SELECT kundenr FROM Kunde WHERE epost = ?", (email,))
-    customerno = cursor.fetchall()[0][0]
-    return customerno
+        # Finner kundenummer til bruker gitt email
+        cursor.execute("SELECT kundenr FROM Kunde WHERE epost = ?", (email,))
+        customerno = cursor.fetchall()[0][0]
+        return customerno
+    else:
+        return 0
 
 
+# Henter inn start- og endestasjon fra brukerinput, og sjekker at de er gyldige
 def get_stations():
-    # Henter inn start- og endestasjon fra brukerinput, og sjekker at de er gyldige
     print("\n")
     start_station = input("Skriv inn en startstasjon: ").lower().title()
     while not start_station in saved_stations:
+        print("Den stasjonen finnes ikke!")
         start_station = input("Skriv inn en startstasjon: ").lower().title()
 
     end_station = input(
-        "Skriv inn en endestasjon (må være forskjellig fra startstasjon): ").lower().title()
-
-    while not end_station in saved_stations or end_station == start_station:
+        "Skriv inn en endestasjon: ").lower().title()
+    while not end_station in saved_stations:
+        print("Den stasjonen finnes ikke!")
         end_station = input(
-            "Skriv inn en endestasjon (må være forskjellig fra startstasjon): ").lower().title()
+            "Skriv inn en endestasjon: ").lower().title()
+
+    while end_station == start_station:
+        print("Endestasjon må være forskjellig fra startstasjon!")
+        end_station = input(
+            "Skriv inn en endestasjon: ").lower().title()
 
     return (start_station, end_station)
 
@@ -113,44 +122,60 @@ def get_all_wagons_and_types(routeno):
     return (wagons, wagon_type_dict)
 
 
-def get_available_seats_in_wagons(wagons, sub_routes, chosen_date):
+# Henter oppsettID-en til en oppgitt rute
+def get_wagon_layout(routeno):
+    cursor.execute("SELECT oppsettID FROM Togrute WHERE rutenr = ?", (routeno,))
+    wagon_layout = cursor.fetchall()[0][0]
+    return wagon_layout
+
+
+def get_available_seats_in_wagons(wagons, sub_routes, chosen_date, routeno):
+    sub_routes_taken_seats_dict = {}
+    for sub_route in sub_routes:
+        start_sub_station = sub_route[0]
+        end_sub_station = sub_route[1]
+        
+        layout_ID = get_wagon_layout(routeno)
+        
+        # Finner plasser i vognen som er bestilt på delstrekningen på kundens valgte dato
+        cursor.execute("""SELECT Billett.vognID, plassnr FROM Billett JOIN Kundeordre USING (ordrenr) JOIN VognIOppsett USING (vognID) 
+                        WHERE startstasjon = ? AND endestasjon = ? AND forekomstDato = ? AND oppsettID = ?
+                        ORDER BY Billett.vognID""",
+                        (start_sub_station, end_sub_station, chosen_date.strftime("%Y-%d-%m"), layout_ID))
+        rows = cursor.fetchall()
+        
+        wagon_unavailable_seats_dict = {}
+        for row in rows:
+            if row[0] in wagon_unavailable_seats_dict.keys():
+                wagon_unavailable_seats_dict[row[0]].append(row[1])
+            else:
+                wagon_unavailable_seats_dict[row[0]] = [row[1]]
+
+        sub_routes_taken_seats_dict[sub_route] = wagon_unavailable_seats_dict
+
     wagon_available_seats_dict = {}
     for wagon in wagons:
         id = wagon[0]
-        sub_routes_seats_dict = {}
+        unavailable_seats = set()
         cursor.execute(
             "SELECT plassnr FROM Plass WHERE vognID = ?", (id,))
-        seats = [seat[0] for seat in cursor.fetchall()]
-        for sub_route in sub_routes:
-            start_sub_station = sub_route[0]
-            end_sub_station = sub_route[1]
-
-            avaliable_seats = []
-            # Finner plasser i vognen som ikke er bestilt på brukerens valgte dato
-            for seat in seats:
-                cursor.execute("""SELECT billettnr FROM Billett JOIN Kundeordre USING (ordrenr) 
-                               WHERE vognID = ? AND plassnr = ? AND startstasjon = ? AND endestasjon = ? AND forekomstDato = ?""",
-                    (id, seat, start_sub_station, end_sub_station, chosen_date.strftime("%Y-%d-%m")))
-                ticket_count = cursor.fetchall()
-                if (len(ticket_count) == 0):
-                    avaliable_seats.append(seat)
-
-            sub_routes_seats_dict[sub_route] = avaliable_seats
-
-        # Finner seter som er utilgjengelige på minst en av delstrekningene på brukerens valgte strekning
-        unavailable_seats = []
+        seats = {seat[0] for seat in cursor.fetchall()}
         for seat in seats:
-            for sub_route in sub_routes:
-                available_seats_on_subroute = sub_routes_seats_dict[sub_route]
-                if seat not in available_seats_on_subroute and seat not in unavailable_seats:
-                    unavailable_seats.append(seat)
+            for sub_route in sub_routes_taken_seats_dict.keys():
+                taken_seats_dict = sub_routes_taken_seats_dict[sub_route]
+                if id in taken_seats_dict.keys():
+                    if seat in taken_seats_dict[id]:
+                        unavailable_seats.add(seat)
+        wagon_available_seats_dict[id] = list(seats - unavailable_seats)
 
-        # Fjerner de utilgjengelige setene fra vognen
-        available_seats = seats[:]
-        for unavailable_seat in unavailable_seats:
-            available_seats.remove(unavailable_seat)
-        if (len(available_seats) != 0):
-            wagon_available_seats_dict[id] = available_seats
+    """
+    Liten forklaring for hva vi har tenkt her:
+    Vi ønsker å bare vise vogner som har ledige plasser på hele ruten brukeren har valgt. 
+    Vi henter derfor, for hver delstrekning, inn de plassene som er opptatt på den delstrekningen på brukerens valgte dato.
+    Deretter sjekker vi for hver mulige plass i hver vogn, om denne plassen er utilgengelig på noen av delstrekningene. Dersom det er det,
+    legg den til i en mengde med utilgjengelige plasser. De plassene som er tilgjengelige under hele ruten i en vogn er da differansen mellom mengden 
+    av alle mulige plasser i denne vognen og de setene som er opptatt på minst én delstrekning i vognen. 
+    """
 
     return wagon_available_seats_dict
 
@@ -164,6 +189,7 @@ def get_chosen_date(routeno):
     # Hvis det ikke finnes noen forekomster, informer bruker
     if (len(avaliable_dates) == 0):
         print("Det er dessverre ingen registrerte forekomster av den oppgitte togruten for øyeblikket. Prøv igjen senere.")
+        return None
     else:
         date_today = datetime.date.today()
         for i in range(len(avaliable_dates)):
@@ -206,6 +232,9 @@ def get_chosen_wagons_and_seats(wagon_available_seats_dict, wagon_type_dict):
         valid_ids = []
         print("\n")
         print("Tilgjengelige vogner på ruten:")
+        if wagon_available_seats_dict.keys() == 0:
+            print("Denne togruten er dessverre utsolgt")
+            return None
         for wagon in wagon_available_seats_dict.keys():
             valid_ids.append(wagon)
             print(f"ID: {wagon}, Type: {wagon_type_dict[wagon]}")
@@ -282,6 +311,16 @@ def get_chosen_wagons_and_seats(wagon_available_seats_dict, wagon_type_dict):
                 else:
                     print("Du har allerede valgt den plassen!")
 
+        chosen = False
+        if len(wagon_chosen_seats_dict) > 0:
+            for wagon in wagon_chosen_seats_dict.keys():
+                if len(wagon_chosen_seats_dict[wagon]) > 0:
+                    chosen = True
+
+        if not chosen:
+            print("Du har ikke valgt noen vogner eller plasser, bestillingen avbrytes")
+            return None
+
         return wagon_chosen_seats_dict
 
 
@@ -294,7 +333,7 @@ def place_order(customerno, ticket_count, chosen_date, routeno):
     return orderno
 
 
-# Oppretter en billett for hver valgte plass i de valte vognene for hver delstrekning på valgt strekning
+# Oppretter en billett for hver valgte plass i de valgte vognene for hver delstrekning på valgt strekning
 def create_tickets(orderno, sub_routes, wagon_chosen_seats_dict):
     for sub_route in sub_routes:
         for wagon in wagon_chosen_seats_dict.keys():
@@ -314,101 +353,106 @@ def main():
     print("\n")
 
     customerno = get_customerno()
-    start_station, end_station = get_stations()
-    route_numbers = get_all_routenos()
+    if customerno != 0:
+        start_station, end_station = get_stations()
+        route_numbers = get_all_routenos()
 
-    # Liste for togruter med oppgitt strekning, samt liste over alle stasjoner mellom start- og endestasjon
-    train_routes = []
-    stations_in_between = []
-    route_stations_in_between_dict = {}
+        # Liste for togruter med oppgitt strekning, samt liste over alle stasjoner mellom start- og endestasjon
+        train_routes = []
+        stations_in_between = []
+        route_stations_in_between_dict = {}
 
-    # Itererer gjennom alle togruter
-    for i in range(len(route_numbers)):
-        # Henter alle stasjoner på ruten, samt deres stasjonsnr
-        cursor.execute("SELECT * FROM Togrutetabell WHERE rutenr = ?",
-                       (str(route_numbers[i][0]),))
-        stationQuery = cursor.fetchall()
+        # Itererer gjennom alle togruter
+        for i in range(len(route_numbers)):
+            # Henter alle stasjoner på ruten, samt deres stasjonsnr
+            cursor.execute("SELECT * FROM Togrutetabell WHERE rutenr = ?",
+                        (str(route_numbers[i][0]),))
+            stationQuery = cursor.fetchall()
 
-        stations = []
-        stationno = []
-        stations_dict = {}
+            stations = []
+            stationno = []
+            stations_dict = {}
 
-        # Lager map mellom stasjoner og deres stasjonnr
-        for row in stationQuery:
-            stations.append(row[1])
-            stationno.append(row[4])
+            # Lager map mellom stasjoner og deres stasjonnr
+            for row in stationQuery:
+                stations.append(row[1])
+                stationno.append(row[4])
 
-        stations_dict = {stations[j]: stationno[j]
-                         for j in range(len(stations))}
+            stations_dict = {stations[j]: stationno[j]
+                            for j in range(len(stations))}
 
-        # Sjekker om start- og endestasjonen er i togruten
-        if ((start_station in stations) and (end_station in stations)):
-            # Sjekker at endestasjon kommer etter startstasjon
-            if stations_dict[end_station] > stations_dict[start_station]:
-                train_routes.append(route_numbers[i][0])
+            # Sjekker om start- og endestasjonen er i togruten
+            if ((start_station in stations) and (end_station in stations)):
+                # Sjekker at endestasjon kommer etter startstasjon
+                if stations_dict[end_station] > stations_dict[start_station]:
+                    train_routes.append(route_numbers[i][0])
 
-                # Hvis det finnes mellomstasjoner på strekningen, legg dem til i en egen liste
-                for station in stations:
-                    if ((stations_dict[station] > stations_dict[start_station]) and (stations_dict[station] < stations_dict[end_station])):
-                        stations_in_between.append(station)
+                    # Hvis det finnes mellomstasjoner på strekningen, legg dem til i en egen liste
+                    for station in stations:
+                        if ((stations_dict[station] > stations_dict[start_station]) and (stations_dict[station] < stations_dict[end_station])):
+                            stations_in_between.append(station)
 
-                # Lager en mapping mellom hvert togrutenummer og tilhørende mellomstasjoner
-                route_stations_in_between_dict.update(
-                    {route_numbers[i][0]:  stations_in_between})
-                # Tømmer mellomstasjoner før neste iterering
-                stations_in_between = []
+                    # Lager en mapping mellom hvert togrutenummer og tilhørende mellomstasjoner
+                    route_stations_in_between_dict.update(
+                        {route_numbers[i][0]:  stations_in_between})
+                    # Tømmer mellomstasjoner før neste iterering
+                    stations_in_between = []
 
-    # Hvis ingen togruter inneholder oppgitt strekning, informer bruker
-    available_routes = len(train_routes)
-    if (available_routes == 0):
-        print("Det finnes ingen registrert togrute for strekning " +
-              start_station + " til " + end_station + "!")
-    else:
-        # Skriver ut hvilke togruter bruker kan velge mellom
-        print("\n")
-        print("Mulige togruter for strekning: ")
-        for k in range(available_routes):
-            print("Togrute nr. " + str(train_routes[k]))
-
-        # Henter ønsket togrutenummer fra bruker
-        routeno = input("Velg én togrute: ")
-        while not routeno in [str(train_route) for train_route in train_routes]:
-            routeno = input(
-                "Velg én togrute: ")
-        print("Du har valgt togrute " + str(routeno))
-
-        # Finner stasjoner mellom start- og slutt
-        stations_in_between = route_stations_in_between_dict[int(routeno)]
-        if (is_main_direction(routeno)):
-            stations_in_between.reverse()
-        between_length = len(stations_in_between)
-
-        # Legger til alle delstrekninger på valgt strekning i en liste
-        sub_routes = []
-        if between_length != 0:
-            sub_routes.append((start_station, stations_in_between[0]))
-            for i in range(1, between_length):
-                if (between_length > 1):
-                    sub_routes.append(
-                        (stations_in_between[i-1], stations_in_between[i]))
-            sub_routes.append(
-                (stations_in_between[between_length-1], end_station))
+        # Hvis ingen togruter inneholder oppgitt strekning, informer bruker
+        available_routes = len(train_routes)
+        if (available_routes == 0):
+            print("Det finnes ingen registrert togrute for strekning " +
+                start_station + " til " + end_station + "!")
         else:
-            sub_routes.append((start_station, end_station))
+            # Skriver ut hvilke togruter bruker kan velge mellom
+            print("\n")
+            print("Mulige togruter for strekning: ")
+            for k in range(available_routes):
+                print("Togrute nr. " + str(train_routes[k]))
 
-        chosen_date = get_chosen_date(routeno)
-        wagons, wagon_type_dict = get_all_wagons_and_types(routeno)
-        wagon_available_seats_dict = get_available_seats_in_wagons(
-            wagons, sub_routes, chosen_date)
-        wagon_chosen_seats_dict = get_chosen_wagons_and_seats(
-            wagon_available_seats_dict, wagon_type_dict)
-        ticket_count = get_ticket_count(wagon_chosen_seats_dict)
-        orderno = place_order(customerno, ticket_count, chosen_date, routeno)
-        create_tickets(orderno, sub_routes, wagon_chosen_seats_dict)
+            # Henter ønsket togrutenummer fra bruker
+            routeno = input("Velg én togrute: ")
+            while not routeno in [str(train_route) for train_route in train_routes]:
+                routeno = input(
+                    "Velg én togrute: ")
+            print("Du har valgt togrute " + str(routeno))
 
-    print("\n")
-    print("Din bestilling er nå lagt inn. God tur!")
+            # Finner stasjoner mellom start- og slutt
+            stations_in_between = route_stations_in_between_dict[int(routeno)]
+            if (is_main_direction(routeno)):
+                stations_in_between.reverse()
+            between_length = len(stations_in_between)
 
+            # Legger til alle delstrekninger på valgt strekning i en liste
+            sub_routes = []
+            if between_length != 0:
+                sub_routes.append((start_station, stations_in_between[0]))
+                for i in range(1, between_length):
+                    if (between_length > 1):
+                        sub_routes.append(
+                            (stations_in_between[i-1], stations_in_between[i]))
+                sub_routes.append(
+                    (stations_in_between[between_length-1], end_station))
+            else:
+                sub_routes.append((start_station, end_station))
+
+            chosen_date = get_chosen_date(routeno)
+            if chosen_date is not None:
+                wagons, wagon_type_dict = get_all_wagons_and_types(routeno)
+                wagon_available_seats_dict = get_available_seats_in_wagons(
+                    wagons, sub_routes, chosen_date, routeno)
+                wagon_chosen_seats_dict = get_chosen_wagons_and_seats(
+                    wagon_available_seats_dict, wagon_type_dict)
+                if wagon_chosen_seats_dict is not None:
+                    ticket_count = get_ticket_count(wagon_chosen_seats_dict)
+                    orderno = place_order(customerno, ticket_count, chosen_date, routeno)
+                    create_tickets(orderno, sub_routes, wagon_chosen_seats_dict)
+
+                    print("\n")
+                    print("Din bestilling er nå lagt inn. God tur!")
+    else:
+        print("Det finnes ingen brukere i registeret!")
+        print("Vennligst opprett en bruker for å bestille en togreise")
     print("\n")
     print("------------------------------------------------------------------------------------------------------------------------------------")
 

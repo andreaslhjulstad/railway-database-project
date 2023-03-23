@@ -203,6 +203,7 @@ def get_available_spots_in_wagons(wagons, chosen_date, routeno, start_station, e
                     for j in range(1, diff_bottom + 1):
                         unavailable_spots.add(spot - j)
                 unavailable_spots.add(spot)
+                break
         wagon_unavailable_spots_dict[wagon].update(unavailable_spots)
 
     wagon_available_spots_dict = {}
@@ -219,7 +220,7 @@ def get_available_spots_in_wagons(wagons, chosen_date, routeno, start_station, e
     # Liten forklaring for hva vi har tenkt her:
     # Vi ønsker å bare vise vogner som har ledige plasser på hele ruten brukeren har valgt. 
     # Vi henter derfor inn alle billettene som er bestilt på brukerens valgte dato. 
-    # Deretter sjekker vi for hver mulige plass i hver vogn, om denne plassen er utilgengelig på noen av delstrekningene. Dersom det er det,
+    # Deretter sjekker vi for hver mulige plass i hver vogn, om denne plassen er utilgengelig på noen av delstrekningene. Dersom den er det,
     # legg den til i en mengde med utilgjengelige plasser. For sovevogner står det spesifisert i oppgaven at en ikke skal kunne booke en seng i en kupé
     # der noen andre allerede har booket en seng, derfor legges alle sengene i en sovekupé til i listen over utilgjengelige plasser dersom en av dem er booket.
     # De plassene som er tilgjengelige under hele ruten i en vogn er da differansen mellom mengden 

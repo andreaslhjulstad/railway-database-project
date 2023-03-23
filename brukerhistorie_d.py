@@ -138,10 +138,10 @@ def get_weekdays(date):
     return (curr_weekday, next_weekday)
 
 
-# Returnerer en oversikt over tidspunkt et tog er innom en stasjon på de gitte ukedagene
-def get_station_rows(station, curr_weekday, next_weekday):
-    cursor.execute("SELECT * FROM Togrutetabell WHERE stasjon = ? AND (rutenr IN (SELECT rutenr From Driftsdager WHERE (ukedag = ? OR ukedag = ?)))",
-                   (station, curr_weekday, next_weekday))
+# Returnerer en oversikt over tidspunkt et tog er innom en stasjon på en gitt ukedag
+def get_station_rows(station, weekday):
+    cursor.execute("SELECT * FROM Togrutetabell WHERE stasjon = ? AND (rutenr IN (SELECT rutenr From Driftsdager WHERE ukedag = ?))",
+                   (station, weekday))
     return cursor.fetchall()
 
 
@@ -166,38 +166,9 @@ def get_valid_routes(start_station_rows, end_station_rows):
                         start_departing_hours, start_departing_minutes)
                     valid_routes.append(
                         (start_station_routeno, start_departing_time))
+    sorted_valid_routes = sorted(valid_routes, key=lambda x: x[1])
 
-    return valid_routes
-
-
-# Henter ut alle togruteforekomster
-def get_occurence_rows():
-    cursor.execute("SELECT * FROM Togruteforekomst")
-    occurence_rows = cursor.fetchall()
-    return occurence_rows
-
-
-# Henter ut det endelige resultatet av togruter som går fra startstasjonen til endestasjonen med en forekomst på den gitte datoen
-def get_final_result(valid_routes, occurence_rows, date, next_date, time):
-    datestr = date.strftime("%Y-%d-%m")
-    next_datestr = next_date.strftime("%Y-%d-%m")
-    
-    final_result = []
-    for route in valid_routes:
-        for row in occurence_rows:
-            if row[1] == route[0] and (row[0] == datestr or row[0] == next_datestr):
-                # Togruten går samme dag og før brukerens valgte tidspunkt
-                if row[0] == datestr and route[1] < time:
-                    continue
-                if row[0] == datestr:
-                    result_date = date
-                elif row[0] == next_datestr:
-                    result_date = next_date
-                final_result.append((route[0], result_date, route[1]))
-
-    # Sorterer først på dato, deretter på tidspunkt
-    sorted_final_result = sorted(final_result, key=lambda x: (x[1], x[2]))
-    return sorted_final_result
+    return sorted_valid_routes
 
 
 def main():
@@ -210,37 +181,40 @@ def main():
     print("\n")
 
     (start_station, end_station, date, time) = get_user_input()
-    next_date = date + datetime.timedelta(1)
     (curr_weekday, next_weekday) = get_weekdays(date)
 
-    # Formatering for print output
-    datestr = date.strftime("%Y-%d-%m")
-    next_datestr = next_date.strftime("%Y-%d-%m")
     timestr = time.strftime("%H:%M")
 
-    start_station_rows = get_station_rows(
-        start_station, curr_weekday, next_weekday)
-    end_station_rows = get_station_rows(
-        end_station, curr_weekday, next_weekday)
+    start_station_rows_current = get_station_rows(
+        start_station, curr_weekday)
+    end_station_rows_current = get_station_rows(
+        end_station, curr_weekday)
+    start_station_rows_next = get_station_rows(
+        start_station, next_weekday)
+    end_station_rows_next = get_station_rows(
+        end_station, next_weekday)
 
-    valid_routes = get_valid_routes(start_station_rows, end_station_rows)
-    occurrence_rows = get_occurence_rows()
-    final_result = get_final_result(
-        valid_routes, occurrence_rows, date, next_date, time)
+    valid_routes_current = get_valid_routes(start_station_rows_current, end_station_rows_current)
+    valid_routes_next = get_valid_routes(start_station_rows_next, end_station_rows_next)
+
 
     print("\n")
-    if (len(final_result) > 0):
+    if len(valid_routes_current) > 0 or len(valid_routes_next) > 0:
         print(
-            f"Disse rutene går fra {start_station} til {end_station} etter klokka {timestr} den {datestr} eller {next_datestr}:")
-        for result in final_result:
-            routeno = result[0]
-            timestamp_formatted = result[2].strftime("%H:%M")
-            date_formatted = result[1].strftime("%Y-%d-%m")
+            f"Disse rutene går fra {start_station} til {end_station} etter klokka {timestr} på {curr_weekday} eller {next_weekday}:")
+        for route in valid_routes_current:
+            routeno = route[0]
+            timestamp_formatted = route[1].strftime("%H:%M")
             print(
-                f"Rutenr: {routeno}, Tidspunkt: {timestamp_formatted}, Dato: {date_formatted}")
+                f"Rutenr: {routeno}, Tidspunkt: {timestamp_formatted}, Ukedag: {curr_weekday}")
+        for route in valid_routes_next:
+            routeno = route[0]
+            timestamp_formatted = route[1].strftime("%H:%M")
+            print(
+                f"Rutenr: {routeno}, Tidspunkt: {timestamp_formatted}, Ukedag: {next_weekday}")
     else:
         print(
-            f"Det går dessverre ingen ruter fra {start_station} til {end_station} etter klokka {timestr} den {datestr} eller {next_datestr}")
+            f"Det går dessverre ingen ruter fra {start_station} til {end_station} etter klokka {timestr} på {curr_weekday} eller {next_weekday}")
     print("\n")
     print("--------------------------------------------------------------------------------------------------------------")
 

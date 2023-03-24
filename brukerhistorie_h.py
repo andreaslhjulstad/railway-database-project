@@ -8,11 +8,14 @@ import sqlite3
 con = sqlite3.connect("jernbaneDatabase.db")
 cursor = con.cursor()
 
+# Hjelpemetoder:
+
 # Henter oppsettID-en til en oppgitt rute
 def get_wagon_layout(routeno):
     cursor.execute("SELECT oppsettID FROM Togrute WHERE rutenr = ?", (routeno,))
     wagon_layout = cursor.fetchall()[0][0]
     return wagon_layout
+
 
 # Returnerer vognnummeret en vogn med en gitt ID har i et gitt vognoppsett
 def get_wagon_number(wagon_id, layout_id):
@@ -22,8 +25,9 @@ def get_wagon_number(wagon_id, layout_id):
         return wagon_number[0][0]
     else:
         return 0
-    
-# Returnerer vognnummeret en vogn med en gitt ID har i et gitt vognoppsett
+
+
+# Returnerer avgangstiden for en gitt togrute fra en gitt stasjon
 def get_departure_time(routeno, start_station):
     cursor.execute("SELECT avgangstid FROM Togrutetabell WHERE rutenr = ? AND stasjon = ?", (routeno, start_station))
     departure_time = cursor.fetchall()
@@ -31,6 +35,7 @@ def get_departure_time(routeno, start_station):
         return departure_time[0][0]
     else:
         return 0
+
 
 # Legger registrerte e-postadresser i en liste for validering
 def get_registered_emails():
@@ -40,6 +45,7 @@ def get_registered_emails():
     for row in rows:
         registered_emails.append(row[0])
     return registered_emails
+
 
 # Henter email fra bruker
 print("----------------------------Fremtidige bestillinger----------------------------")
@@ -60,7 +66,7 @@ orders = cursor.fetchall()
 print("")
 print("Skriver ut dine fremtidige bestillinger: ")
 for i in range(len(orders)):
-    ordernr = orders[i][0]
+    orderno = orders[i][0]
     order_date = orders[i][1]
     order_time = orders[i][2]
     ticket_date = orders[i][3]
@@ -72,15 +78,15 @@ for i in range(len(orders)):
         continue
 
     print("")
-    print("Ordrenr: " + str(ordernr))
+    print("Ordrenr: " + str(orderno))
     print("Bestillingsdato: " + str(order_date))
     print("Bestillingstidspunkt: " + str(order_time)[0:-3])
     print("----------------------------------------------")
 
-    cursor.execute("select * from Billett where ordrenr = ?", (ordernr,))
+    cursor.execute("select * from Billett where ordrenr = ?", (orderno,))
     tickets = cursor.fetchall()
     for j in range(len(tickets)):
-        ticketnr = tickets[j][0]
+        ticketno = tickets[j][0]
         ticket_seat = tickets[j][1]
         ticket_wagon = tickets[j][2]
         wagon_layout = get_wagon_layout(routeno)
@@ -89,7 +95,7 @@ for i in range(len(orders)):
         ticket_end = tickets[j][5]
         depature_time = get_departure_time(routeno, ticket_start)
 
-        print("Billettnr: " + str(ticketnr))
+        print("Billettnr: " + str(ticketno))
         print("Strekning for reisen: " + str(ticket_start) + " - " + str(ticket_end))
         print("Dato for avreisen: " + str(ticket_date))
         print("Tidspunkt for avreisen: " + str(depature_time)[0:-3])

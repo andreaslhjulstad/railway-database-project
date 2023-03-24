@@ -61,6 +61,7 @@ def get_stations():
 
     return (start_station, end_station)
 
+
 # Henter alle togrutenummer
 def get_all_routenos():
     cursor.execute("SELECT rutenr FROM Togrute")
@@ -354,7 +355,7 @@ def place_order(customerno, ticket_count, chosen_date, routeno):
     return orderno
 
 
-# Oppretter en billett for hver valgte plass i de valgte vognene for hver delstrekning på valgt strekning
+# Oppretter en billett for hver valgte plass i de valgte vognene for strekningen
 def create_tickets(orderno, wagon_chosen_spots_dict, start_station, end_station):
     for wagon in wagon_chosen_spots_dict.keys():
         for spot in wagon_chosen_spots_dict[wagon]:
@@ -363,7 +364,7 @@ def create_tickets(orderno, wagon_chosen_spots_dict, start_station, end_station)
     con.commit()
 
 
-# Helper methods:
+# Hjelpemetoder:
 
 # Henter delstrekninger på en strekning mellom start- og endestasjon på en gitt rute
 def get_sub_routes_for_stretch(start_station, end_station, routeno):
@@ -391,7 +392,6 @@ def get_sub_routes_for_stretch(start_station, end_station, routeno):
                 if ((stations_dict[station] > stations_dict[start_station]) and (stations_dict[station] < stations_dict[end_station])):
                     stations_in_between.append(station)
 
-    # Finner stasjoner mellom start- og slutt
     if (is_main_direction(routeno)):
         stations_in_between.reverse()
     between_length = len(stations_in_between)

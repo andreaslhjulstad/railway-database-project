@@ -11,13 +11,12 @@ cursor = con.cursor()
 
 # Skript for å spørre brukeren om nødvendig informasjon
 def get_user_info():
-    name = input("Skriv inn fornavnet ditt: ").lower()
+    name = input("Skriv inn fornavnet ditt: ").capitalize()
     # Sjekker at navnet består av bare bokstaver og er 2-30 tegn, og gir brukeren et nytt forsøk dersom det ikke er det
     while not re.fullmatch('[a-z]{2,30}', name):
         print("Ugyldig navn! Navnet må bestå av bokstaver og være 2-30 tegn langt")
-        name = input("Skriv inn fornavnet ditt: ").lower()
+        name = input("Skriv inn fornavnet ditt: ").capitalize()
     # Gjør forbokstaven i navnet stor
-    name = name[0].upper() + name[1:]
 
     email = input("Skriv inn e-postadressen din: ")
     # Sjekker at e-posten er på gyldig format, og gir brukeren et nytt forsøk dersom det ikke er det

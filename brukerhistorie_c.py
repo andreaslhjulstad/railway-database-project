@@ -2,19 +2,25 @@
 Denne funksjonaliteten skal programmeres. """
 
 import sqlite3
-con = sqlite3.connect("jernbaneDatabase.db")
 
+# Oppretter tilkobling til databasen
+con = sqlite3.connect("jernbaneDatabase.db")
 cursor = con.cursor()
 
-success = 0 
+# Lager en variabel for å sjekke om programmet er ferdig
+success = 0
 
+# Løkke som kjører fram til begge brukerinputene er validert og returnerer utskriften
 while success == 0:
     station = input("Velg stasjon: ").lower().title()
     weekday = input("Velg ukedag: ").lower()
 
-    valid_weekdays = ["mandag", "tirsdag", "onsdag", "torsdag", "fredag", "lørdag", "søndag"]
+    # Oversikt over gyldige ukedager
+    valid_weekdays = ["mandag", "tirsdag", "onsdag",
+                      "torsdag", "fredag", "lørdag", "søndag"]
 
-    cursor.execute("select rutenr, ankomsttid, avgangstid from Togrutetabell join Driftsdager using (rutenr) where stasjon = ? and ukedag = ?", (station, weekday))
+    cursor.execute(
+        "select rutenr, ankomsttid, avgangstid from Togrutetabell join Driftsdager using (rutenr) where stasjon = ? and ukedag = ?", (station, weekday))
 
     rows = cursor.fetchall()
 
@@ -22,16 +28,19 @@ while success == 0:
 
     success = 0
 
-    if weekday in valid_weekdays: 
+    # Sjekker om ukedagen er gyldig og om stasjonen er i databasen
+    if weekday in valid_weekdays:
         if rows != []:
-            print("Disse resultatene ble funnet for " + station + " på " + weekday + ":")
+            print("Disse resultatene ble funnet for " +
+                  station + " på " + weekday + ":")
             print("Rutenummer, Ankomsttid, Avgangstid: ")
             for i in range(len(rows)):
                 print(rows[i])
             success = 1
-        else: 
+        else:
             print("Stasjon eksisterer ikke! Vennligst prøv igjen")
     else:
         print("Ukedag er ikke gyldig! Vennligst prøv igjen")
 
+# Lukker databasen
 con.close()

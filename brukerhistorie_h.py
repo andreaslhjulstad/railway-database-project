@@ -4,7 +4,7 @@ reiser. Denne funksjonaliteten skal programmeres. """
 from datetime import date, datetime
 import sqlite3
 
-# Kobler til databasen:
+# Kobler til databasen
 con = sqlite3.connect("jernbaneDatabase.db")
 cursor = con.cursor()
 
@@ -41,7 +41,7 @@ def get_registered_emails():
         registered_emails.append(row[0])
     return registered_emails
 
-# Henter email fra bruker:
+# Henter email fra bruker
 print("----------------------------Fremtidige bestillinger----------------------------")
 print("")
 email = input("Skriv inn e-postadressen din: ")
@@ -53,7 +53,7 @@ dagens_dato = date.today()
 dato_formatert = dagens_dato.strftime("%Y-%d-%m")
 dato_formatert = datetime.strptime(dato_formatert, "%Y-%d-%m")
 
-# Henter brukerens ordre og billetter fra databasen og skriver dem ut:
+# Henter brukerens ordre og billetter fra databasen og skriver dem ut
 cursor.execute("select ordrenr, dato, tid, forekomstdato, rutenr from (Kunde join Kundeordre using (kundenr)) where epost = ?", (email,))
 orders = cursor.fetchall()
 
@@ -69,7 +69,7 @@ for i in range(len(orders)):
     print("")
     print("Ordrenr: " + str(ordernr))
     print("Bestillingsdato: " + str(order_date))
-    print("Bestillingstidspunkt: " + str(order_time))
+    print("Bestillingstidspunkt: " + str(order_time)[0:-3])
     print("----------------------------------------------")
 
     cursor.execute("select * from Billett where ordrenr = ?", (ordernr,))
@@ -87,7 +87,10 @@ for i in range(len(orders)):
         print("Billettnr: " + str(ticketnr))
         print("Strekning for reisen: " + str(ticket_start) + " - " + str(ticket_end))
         print("Dato for avreisen: " + str(ticket_date))
-        print("Tidspunkt for avreisen: " + str(depature_time))
+        print("Tidspunkt for avreisen: " + str(depature_time)[0:-3])
         print("Vognnr: " + str(wagon_number))
         print("Setenr: " + str(ticket_seat))
         print("----------------------------------------------")
+
+# Lukker database
+con.close()

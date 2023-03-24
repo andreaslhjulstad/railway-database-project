@@ -25,7 +25,7 @@ def get_customerno():
     saved_emails = [email[0] for email in cursor.fetchall()]
     if not len(saved_emails) == 0: 
         # Henter inn e-postadresse fra bruker
-        print("\n")
+        print("")
         email = input("Skriv inn e-posten din: ")
         while not email in saved_emails:
             print("Den e-postadressen finnes ikke i registeret!")
@@ -41,7 +41,7 @@ def get_customerno():
 
 # Henter inn start- og endestasjon fra brukerinput, og sjekker at de er gyldige
 def get_stations():
-    print("\n")
+    print("")
     start_station = input("Skriv inn en startstasjon: ").lower().title()
     while not start_station in saved_stations:
         print("Den stasjonen finnes ikke!")
@@ -96,7 +96,7 @@ def get_train_routes(route_numbers, start_station, end_station):
 # Spør brukeren om å velge en togrute fra en liste med mulig togruter
 def get_train_route_input(train_routes, available_routes):
     # Skriver ut hvilke togruter bruker kan velge mellom
-    print("\n")
+    print("")
     print("Mulige togruter for strekning: ")
     for k in range(available_routes):
         print("Togrute nr. " + str(train_routes[k]))
@@ -130,7 +130,7 @@ def get_chosen_date(routeno):
                 valid_dates.append(date.strftime("%Y-%d-%m"))
 
     # Hent ønsket dato fra bruker og sjekk at den er gyldig
-    print("\n")
+    print("")
     print("Gyldige datoer for reisen:", end=" ")
     for valid_date in valid_dates:
         print(valid_date, end="")
@@ -231,7 +231,7 @@ def get_available_spots_in_wagons(wagons, chosen_date, routeno, start_station, e
 def get_chosen_wagons_and_spots(wagon_available_spots_dict, routeno):
     # Finner gyldige IDer for vognene i ruten
 
-    print("\n")
+    print("")
     if len(wagon_available_spots_dict.keys()) == 0:
         print("Denne togruten er dessverre utsolgt")
         return None
@@ -248,7 +248,7 @@ def get_chosen_wagons_and_spots(wagon_available_spots_dict, routeno):
         valid_numbers.append(wagon_number)
         print(f"Nummer: {wagon_number}, Type: {get_wagon_type(wagon_id)}")
 
-    print("\n")
+    print("")
     # Spør bruker om å oppgi én vogn til billettbestilling
     print("Velg vognene du ønsker å kjøpe plasser i. For å velge en vogn, skriv vognnummeret i innskrivings-feltet og trykk 'Enter'.")
     print("Dersom du ikke ønsker å velge flere vogner, skriv 'Stopp' i innskrivings-feltet.")
@@ -283,7 +283,7 @@ def get_chosen_wagons_and_spots(wagon_available_spots_dict, routeno):
         spots = wagon_available_spots_dict[wagon_id]
 
         valid_spots = []
-        print("\n")
+        print("")
         print("Tilgjengelige plasser i vognen:", end=" ")
         for spot in spots:
             valid_spots.append(spot)
@@ -291,7 +291,7 @@ def get_chosen_wagons_and_spots(wagon_available_spots_dict, routeno):
             if (spots.index(spot) != len(spots) - 1):
                 print(",", end=" ")
 
-        print("\n")
+        print("")
         print("Velg plassene du ønsker å kjøpe billetter for. For å velge en plass, skriv plassnummeret i innskrivings-feltet og trykk 'Enter'.")
         print(
             "Dersom du ikke ønsker å velge flere plasser, skriv 'Stopp' i innskrivings-feltet.")
@@ -329,7 +329,7 @@ def get_chosen_wagons_and_spots(wagon_available_spots_dict, routeno):
                 chosen = True
 
     if not chosen:
-        print("\n")
+        print("")
         print("Du har ikke valgt noen vogner eller plasser, bestillingen avbrytes")
         return None
 
@@ -483,7 +483,7 @@ def main():
 
     customerno = get_customerno()
     if customerno != 0:
-        print("\n")
+        print("")
         print("Tilgjengelige stasjoner:")
         for station in saved_stations:
             print(station)
@@ -512,13 +512,13 @@ def main():
                     orderno = place_order(customerno, ticket_count, chosen_date, routeno)
                     create_tickets(orderno, wagon_chosen_spots_dict, start_station, end_station)
 
-                    print("\n")
+                    print("")
                     print("Din bestilling er nå lagt inn. God tur!")
     else:
         print("Det finnes ingen brukere i registeret!")
         print("Vennligst opprett en bruker for å bestille en togreise")
 
-    print("\n")
+    print("")
     print("------------------------------------------------------------------------------------------------------------------------------------")
 
 

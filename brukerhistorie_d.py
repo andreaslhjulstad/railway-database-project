@@ -173,12 +173,12 @@ def get_valid_routes(start_station_rows, end_station_rows):
 
 def main():
     print("------------------------------------------------Finn togruter-------------------------------------------------")
-    print("\n")
+    print("")
 
     print("Tilgjengelige stasjoner:")
     for station in saved_stations:
         print(station)
-    print("\n")
+    print("")
 
     (start_station, end_station, date, time) = get_user_input()
     (curr_weekday, next_weekday) = get_weekdays(date)
@@ -198,7 +198,7 @@ def main():
     valid_routes_next = get_valid_routes(start_station_rows_next, end_station_rows_next)
 
 
-    print("\n")
+    print("")
     if len(valid_routes_current) > 0 or len(valid_routes_next) > 0:
         print(
             f"Disse rutene går fra {start_station} til {end_station} etter klokka {timestr} på {curr_weekday} eller {next_weekday}:")
@@ -215,7 +215,7 @@ def main():
     else:
         print(
             f"Det går dessverre ingen ruter fra {start_station} til {end_station} etter klokka {timestr} på {curr_weekday} eller {next_weekday}")
-    print("\n")
+    print("")
     print("--------------------------------------------------------------------------------------------------------------")
 
 

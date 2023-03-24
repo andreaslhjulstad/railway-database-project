@@ -23,18 +23,18 @@ def get_user_info():
     # Sjekker at e-posten er på gyldig format, og gir brukeren et nytt forsøk dersom det ikke er det
     while not re.fullmatch(r'([A-Za-z0-9]+[.-_])*[A-Za-z0-9]+@[A-Za-z0-9-]+(\.[A-Z|a-z]{2,})+', email):
         print("Ugyldig e-postadresse!")
-        email = input("Skriv inn e-postadressen din: ").lower()
+        email = input("Skriv inn e-postadressen din: ")
     
     while email in get_registered_emails():
         print("Den e-postadressen er allerede registrert!")
-        email = input("Skriv inn e-postadressen din: ").lower()
+        email = input("Skriv inn e-postadressen din: ")
 
     phoneno = input("Skriv inn mobilnummeret ditt (uten landskode): ")
     # Sjekker at nummeret er et gyldig norsk telefonnummer, og gir brukeren et nytt forsøk dersom det ikke er det
     while not re.fullmatch('[49]{1}[0-9]{7}', phoneno):
         print("Ugyldig mobilnummer! Nummeret må være et gyldig norsk telefonnummer")
         phoneno = input(
-            "Skriv inn mobilnummeret ditt (uten landskode): ").lower()
+            "Skriv inn mobilnummeret ditt (uten landskode): ")
     return (name, email, phoneno)
 
 
@@ -71,16 +71,16 @@ def insert_values(customerno, name, email, phoneno):
 
 def main():
     print("----------------------------Registrer ny bruker----------------------------")
-    print("\n")
+    print("")
 
     (name, email, phoneno) = get_user_info()
     new_customerno = get_next_customerno()
 
     insert_values(new_customerno, name, email, phoneno)
 
-    print("\n")
+    print("")
     print("Brukeren ble registrert")
-    print("\n")
+    print("")
     print("---------------------------------------------------------------------------")
 
 

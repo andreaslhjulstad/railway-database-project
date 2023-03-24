@@ -24,7 +24,7 @@ while success == 0:
 
     rows = cursor.fetchall()
 
-    print("\n")
+    print("")
 
     success = 0
 

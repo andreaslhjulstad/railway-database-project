@@ -18,7 +18,7 @@ for row in rows:
     saved_stations.append(row[0])
 
 
-# Ber brukeren om å skrive inn startstasjon, endestasjon dato og tidspunkt, validerer disse og lagrer dem dersom de er gyldige
+# Ber brukeren om å skrive inn startstasjon, endestasjon, dato og tidspunkt, validerer disse, og lagrer dem dersom de er gyldige
 def get_user_input():
     start_station = input("Skriv inn en startstasjon: ").lower().title()
 

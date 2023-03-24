@@ -48,10 +48,10 @@ email = input("Skriv inn e-postadressen din: ")
 while email not in get_registered_emails():
     email = input("Skriv inn e-postadressen din: ")
 
-# Finner dagens dato:
-dagens_dato = date.today()
-dato_formatert = dagens_dato.strftime("%Y-%d-%m")
-dato_formatert = datetime.strptime(dato_formatert, "%Y-%d-%m")
+# Finner dagens dato
+today_date = date.today()
+date_format = today_date.strftime("%Y-%d-%m")
+date_format = datetime.strptime(date_format, "%Y-%d-%m")
 
 # Henter brukerens ordre og billetter fra databasen og skriver dem ut
 cursor.execute("select ordrenr, dato, tid, forekomstdato, rutenr from (Kunde join Kundeordre using (kundenr)) where epost = ?", (email,))
@@ -65,6 +65,11 @@ for i in range(len(orders)):
     order_time = orders[i][2]
     ticket_date = orders[i][3]
     routeno = orders[i][4]
+
+    # Viser bare billetter med forekomst etter dagens dato
+    date_check = datetime.strptime(ticket_date, "%Y-%d-%m")
+    if not date_check >= date_format:
+        continue
 
     print("")
     print("Ordrenr: " + str(ordernr))

@@ -31,7 +31,7 @@ def get_user_info():
     phoneno = input("Skriv inn mobilnummeret ditt (uten landskode): ")
     # Sjekker at nummeret er et gyldig norsk telefonnummer, og gir brukeren et nytt forsøk dersom det ikke er det
     while not re.fullmatch('[49]{1}[0-9]{7}', phoneno):
-        print("Ugyldig mobilnummer! Nummeret må være et gyldig norsk telefonnummer")
+        print("Ugyldig mobilnummer! Nummeret må være et gyldig norsk telefonnummer (begynner med 4 eller 9)")
         phoneno = input(
             "Skriv inn mobilnummeret ditt (uten landskode): ")
     return (name, email, phoneno)

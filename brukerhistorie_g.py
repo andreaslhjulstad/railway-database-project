@@ -26,10 +26,10 @@ def get_customerno():
     if not len(saved_emails) == 0: 
         # Henter inn e-postadresse fra bruker
         print("")
-        email = input("Skriv inn e-posten din: ")
+        email = input("Skriv inn e-posten din: ").lower()
         while not email in saved_emails:
             print("Den e-postadressen finnes ikke i registeret!")
-            email = input("Skriv inn e-posten din: ")
+            email = input("Skriv inn e-posten din: ").lower()
 
         # Finner kundenummer til bruker gitt email
         cursor.execute("SELECT kundenr FROM Kunde WHERE epost = ?", (email,))

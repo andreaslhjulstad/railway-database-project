@@ -50,9 +50,9 @@ def get_registered_emails():
 # Henter email fra bruker
 print("----------------------------Fremtidige bestillinger----------------------------")
 print("")
-email = input("Skriv inn e-postadressen din: ")
+email = input("Skriv inn e-postadressen din: ").lower()
 while email not in get_registered_emails():
-    email = input("Skriv inn e-postadressen din: ")
+    email = input("Skriv inn e-postadressen din: ").lower()
 
 # Finner dagens dato
 today_date = date.today()
@@ -78,6 +78,7 @@ for i in range(len(orders)):
         continue
 
     print("")
+    print("----------------------------------------------")
     print("Ordrenr: " + str(orderno))
     print("Bestillingsdato: " + str(order_date))
     print("Bestillingstidspunkt: " + str(order_time)[0:-3])

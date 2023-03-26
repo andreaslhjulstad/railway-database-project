@@ -75,7 +75,8 @@ create table Vogn (
     navn varchar(30) not null,
     type varchar(30) not null,
     operatør varchar(30) not null,
-    constraint vogn_pk primary key (vognID) constraint vogn_fk foreign key (operatør) references Operatør(Navn) on update cascade on delete cascade
+    constraint vogn_pk primary key (vognID),
+    constraint vogn_fk foreign key (operatør) references Operatør(Navn) on update cascade on delete cascade
 );
 create table Vognoppsett (
     oppsettID integer not null,
@@ -131,7 +132,8 @@ create table Delstrekning (
     banestrekning varchar(30) not null,
     constraint delstrekning_pk primary key (startstasjon, endestasjon),
     constraint delstrekning_fk1 foreign key (startstasjon) references Jernbanestasjon(navn) on update cascade on delete cascade,
-    constraint delstrekning_fk2 foreign key (endestasjon) references Jernbanestasjon(navn) on update cascade on delete cascade constraint delstrekning_fk3 foreign key (banestrekning) references Banestrekning(navn) on update cascade on delete cascade
+    constraint delstrekning_fk2 foreign key (endestasjon) references Jernbanestasjon(navn) on update cascade on delete cascade,
+    constraint delstrekning_fk3 foreign key (banestrekning) references Banestrekning(navn) on update cascade on delete cascade
 );
 create table StasjonPåBanestrekning (
     stasjon varchar(30) not null,

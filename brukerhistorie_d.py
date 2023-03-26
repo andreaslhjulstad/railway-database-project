@@ -201,12 +201,13 @@ def main():
     print("")
     if len(valid_routes_current) > 0 or len(valid_routes_next) > 0:
         print(
-            f"Disse rutene går fra {start_station} til {end_station} etter klokka {timestr} på {curr_weekday} eller {next_weekday}:")
+            f"Disse rutene går fra {start_station} til {end_station} fra klokka {timestr} på {curr_weekday} eller {next_weekday}:")
         for route in valid_routes_current:
-            routeno = route[0]
-            timestamp_formatted = route[1].strftime("%H:%M")
-            print(
-                f"Rutenr: {routeno}, Tidspunkt: {timestamp_formatted}, Ukedag: {curr_weekday}")
+            if (route[1] >= time):
+                routeno = route[0]
+                timestamp_formatted = route[1].strftime("%H:%M")
+                print(
+                    f"Rutenr: {routeno}, Tidspunkt: {timestamp_formatted}, Ukedag: {curr_weekday}")
         for route in valid_routes_next:
             routeno = route[0]
             timestamp_formatted = route[1].strftime("%H:%M")
@@ -214,7 +215,7 @@ def main():
                 f"Rutenr: {routeno}, Tidspunkt: {timestamp_formatted}, Ukedag: {next_weekday}")
     else:
         print(
-            f"Det går dessverre ingen ruter fra {start_station} til {end_station} etter klokka {timestr} på {curr_weekday} eller {next_weekday}")
+            f"Det går dessverre ingen ruter fra {start_station} til {end_station} fra klokka {timestr} på {curr_weekday} eller {next_weekday}")
     print("")
     print("--------------------------------------------------------------------------------------------------------------")
 

@@ -2,7 +2,7 @@
 
 Ble utviklet som et prosjekt i faget TDT4145 - Datamodellering og databasesystemer våren 2023.
 
-## Hva er prosjektet
+## Hva er prosjektet?
 
 Det er et system for å legge inn jernbanestrekninger og togruter, samt bestilling av biletter for disse.  
 Systemet bruker en SQL-database, som er satt opp med sqlite3.  
